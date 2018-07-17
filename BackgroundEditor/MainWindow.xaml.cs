@@ -31,12 +31,17 @@ namespace Background_Creator
             //C:\Programming\Visual Studio Projects\BackgroundEditor\BackgroundEditor\bin\Debug\Created Backgrounds
             InitializeComponent();
             userSelectionSingleOrMultiple = ButtonCreateSingle.Content.ToString(); // Create Single Background
-            TextBoxCreatePath.Text = @"H:\Images\Star Citizen\Idris Fall 1.0 [3840x2160].jpg";
-            userSelectionLoseslessImages = false;
             userSelectionCustomResolution = false;
-            //TextBoxSaveLocation.Text = Directory.GetCurrentDirectory() + @"\Created Backgrounds";
             TextBoxCreatePath.Text = (string) BackgroundCreator.Properties.Settings.Default["CreatePath"];
             TextBoxSaveLocation.Text = (string) BackgroundCreator.Properties.Settings.Default["SaveLocation"];
+            //ComboBoxResolutions.Text = (string) BackgroundCreator.Properties.Settings.Default["Resolution"];
+            TextBoxTargetResolutionWidth.Text = (string) BackgroundCreator.Properties.Settings.Default["CustomResolution1"];
+            TextBoxTargetResolutionHeight.Text = (string) BackgroundCreator.Properties.Settings.Default["CustomResolution2"];
+            userSelectionLoseslessImages = (bool) BackgroundCreator.Properties.Settings.Default["LoselessResolution"];
+            SliderBlackBarPercentHeight.Value = (int) BackgroundCreator.Properties.Settings.Default["BlackBarHeight"];
+            ComboBoxBlackBarExclusion.SelectedIndex = (int) BackgroundCreator.Properties.Settings.Default["Exclude"];
+            SliderBackgroundImageOpacity.Value = (int) BackgroundCreator.Properties.Settings.Default["BackgroundOpacity"];
+
             if (!Directory.Exists(TextBoxSaveLocation.Text))
                 TextBoxSaveLocation.Text = Directory.GetCurrentDirectory() + @"\Created Backgrounds";
 
@@ -45,7 +50,12 @@ namespace Background_Creator
                 ComboBoxResolutions.Items.Add(SystemParameters.PrimaryScreenWidth.ToString() + " x " + SystemParameters.PrimaryScreenHeight.ToString());
             }
             ComboBoxResolutions.Text = SystemParameters.PrimaryScreenWidth.ToString() + " x " + SystemParameters.PrimaryScreenHeight.ToString();
-            //Directory.CreateDirectory(TextBoxSaveLocation.Text); // Create folder
+
+            if (userSelectionLoseslessImages == true)
+            {
+                ButtonCheckBoxLosslessImages.Content = "✓";
+                ButtonCheckBoxLosslessImages.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 255, 0));
+            }
 
         }
 
@@ -499,6 +509,7 @@ namespace Background_Creator
             LogWriteLine("");
             //MainWindow1.IsEnabled = true;
             EnableDisableControls(true);
+            EnableOrDisableTextBoxResolution();
         }
 
         public void EnableDisableControls(bool enabled)
@@ -547,7 +558,6 @@ namespace Background_Creator
         private void ButtonCreateImage_Click(object sender, RoutedEventArgs e)
         {
             EnableDisableControls(false);
-            //MainWindow1.IsEnabled = false;
             CreateImage();
         }
 
@@ -625,6 +635,12 @@ namespace Background_Creator
             {
                 textBox.Text = "";
             }
+            EnableOrDisableTextBoxResolution();
+            EnableOrDisableButtonCreateImage();
+        }
+
+        public void EnableOrDisableTextBoxResolution()
+        {
             if (TextBoxTargetResolutionWidth.Text.Length > 0 && TextBoxTargetResolutionHeight.Text.Length > 0)
             {
                 ComboBoxResolutions.IsEnabled = false;
@@ -633,14 +649,11 @@ namespace Background_Creator
             else
             {
                 ComboBoxResolutions.IsEnabled = true;
-                userSelectionCustomResolution = false;
             }
-
-
-            EnableOrDisableButtonCreateImage();
         }
 
-        private void TextBoxTargetResolution_PreviewTextInput(object sender, TextCompositionEventArgs e)
+
+            private void TextBoxTargetResolution_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             var textBox = sender as TextBox;
             e.Handled = !(Regex.IsMatch(e.Text, "[0-9]"));
@@ -661,6 +674,13 @@ namespace Background_Creator
         {
             BackgroundCreator.Properties.Settings.Default["SaveLocation"] = TextBoxSaveLocation.Text;
             BackgroundCreator.Properties.Settings.Default["CreatePath"] = TextBoxCreatePath.Text;
+            BackgroundCreator.Properties.Settings.Default["Resolution"] = ComboBoxResolutions.Text;
+            BackgroundCreator.Properties.Settings.Default["CustomResolution1"] = TextBoxTargetResolutionWidth.Text;
+            BackgroundCreator.Properties.Settings.Default["CustomResolution2"] = TextBoxTargetResolutionHeight.Text;
+            BackgroundCreator.Properties.Settings.Default["LoselessResolution"] = userSelectionLoseslessImages;
+            BackgroundCreator.Properties.Settings.Default["BlackBarHeight"] = (int) SliderBlackBarPercentHeight.Value;
+            BackgroundCreator.Properties.Settings.Default["Exclude"] = ComboBoxBlackBarExclusion.SelectedIndex;
+            BackgroundCreator.Properties.Settings.Default["BackgroundOpacity"] = (int) SliderBackgroundImageOpacity.Value;
             BackgroundCreator.Properties.Settings.Default.Save();
         }
 
